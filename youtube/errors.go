@@ -15,6 +15,8 @@ const (
 	ErrVideoPrivate               = constError("user restricted access to this video")
 	ErrInvalidPlaylist            = constError("no playlist detected or invalid playlist ID")
 	ErrNoFormat 				  = constError("no video format provided")
+	ErrGetStream 				  = constError("error while getting stream")
+	ErrCreateOutputFile			  = constError("error while creating output file")
 )
 
 type constError string

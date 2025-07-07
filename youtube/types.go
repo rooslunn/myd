@@ -217,6 +217,18 @@ func (list FormatList) WithAudioChannels() FormatList {
 	})
 }
 
+func (list FormatList) AudioFormats() FormatList {
+	return list.Select(func(f Format) bool {
+		return strings.Contains(f.MimeType, "audio")
+	})
+}
+
+func (list FormatList) VideoFormats() FormatList {
+	return list.Select(func(f Format) bool {
+		return strings.Contains(f.MimeType, "video")
+	})
+}
+
 // FilterQuality reduces the format list to formats matching the quality
 func (v *Video) FilterQuality(quality string) {
 	v.Formats = v.Formats.Quality(quality)

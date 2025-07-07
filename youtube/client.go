@@ -669,3 +669,29 @@ func (c *Client) decryptNParam(config playerConfig, query url.Values) (url.Value
 
 	return query, nil
 }
+
+func (c *Client) DownloadFormat(video *Video, format Format, outputFile string, log *slog.Logger) (error) {
+
+	log.Info(fmt.Sprintf("Downloading %s...", format.MimeType), "length", format.ContentLength, "quality", format.Quality)
+
+	stream, _, err := c.GetStream(video, &format)
+	if err != nil {
+		return err
+	}
+	defer stream.Close()
+
+	file, err := os.Create(outputFile)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	log.Info("Coping stream to file...", "file", outputFile)
+
+	_, err = io.Copy(file, stream)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
