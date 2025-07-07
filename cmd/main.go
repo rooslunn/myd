@@ -68,7 +68,7 @@ func askForFormat(formats []youtube.Format) (uint8) {
 	var formatId uint8
 	fmt.Scanln(&formatId)
 
-	return formatId
+	return formatId - 1
 }
 
 func downloadFormat(format youtube.Format) {

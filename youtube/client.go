@@ -672,7 +672,10 @@ func (c *Client) decryptNParam(config playerConfig, query url.Values) (url.Value
 
 func (c *Client) DownloadFormat(video *Video, format Format, outputFile string, log *slog.Logger) (error) {
 
-	log.Info(fmt.Sprintf("Downloading %s...", format.MimeType), "length", format.ContentLength, "quality", format.Quality)
+	log.Info(
+		fmt.Sprintf("Downloading %s...", format.MimeType), 
+		"length", FormatBytes(format.ContentLength), 
+		"quality", format.Quality)
 
 	stream, _, err := c.GetStream(video, &format)
 	if err != nil {
