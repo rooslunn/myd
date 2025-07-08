@@ -409,7 +409,7 @@ func (c *Client) downloadChunked(ctx context.Context, req *http.Request, w *io.P
 	}
 
 	currentChunk := atomic.Uint32{}
-	for i := 0; i < maxRoutines; i++ {
+	for range maxRoutines {
 		go func() {
 			for {
 				chunkIndex := int(currentChunk.Add(1)) - 1

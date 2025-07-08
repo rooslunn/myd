@@ -24,7 +24,7 @@ const (
 
 func main() {
 	
-	// [ ] todo: combine video and audio
+	// [x] todo: combine video and audio
 	// [ ] todo: global log
 	// [ ] todo: show progress while downloading
 
