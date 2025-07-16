@@ -20,7 +20,7 @@ import (
 	"time"
 )
 
-type clientInfo struct {
+type ClientInfo struct {
 	name           string
 	key            string
 	version        string
@@ -29,9 +29,17 @@ type clientInfo struct {
 	deviceModel    string
 }
 
+func (c *ClientInfo) RandomizeUserAgent() {
+	seed := rand.NewSource(time.Now().UnixNano())
+	rand := rand.New(seed)
+	randomIndex := rand.Intn(len(_CHROME_VERSIONS))
+	randomUA := _CHROME_VERSIONS[randomIndex]
+	c.userAgent = fmt.Sprintf(_USER_AGENT_TPL, randomUA)
+}
+
 type Client struct {
 	HTTPClient *http.Client
-	client *clientInfo
+	client *ClientInfo
 	Info string
 	consentID string
 	MaxRoutines int
@@ -44,12 +52,69 @@ type Client struct {
 }
 
 var (
-	IOSClient = clientInfo{
+	_USER_AGENT_TPL = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36"
+	_CHROME_VERSIONS = [...]string{
+		"90.0.4430.212",
+        "90.0.4430.24",
+        "90.0.4430.70",
+        "90.0.4430.72",
+        "90.0.4430.85",
+        "90.0.4430.93",
+        "91.0.4472.101",
+        "91.0.4472.106",
+        "91.0.4472.114",
+        "91.0.4472.124",
+        "91.0.4472.164",
+        "91.0.4472.19",
+        "91.0.4472.77",
+        "92.0.4515.107",
+        "92.0.4515.115",
+        "92.0.4515.131",
+        "92.0.4515.159",
+        "92.0.4515.43",
+        "93.0.4556.0",
+        "93.0.4577.15",
+        "93.0.4577.63",
+        "93.0.4577.82",
+        "94.0.4606.41",
+        "94.0.4606.54",
+        "94.0.4606.61",
+        "94.0.4606.71",
+        "94.0.4606.81",
+        "94.0.4606.85",
+        "95.0.4638.17",
+        "95.0.4638.50",
+        "95.0.4638.54",
+        "95.0.4638.69",
+        "95.0.4638.74",
+        "96.0.4664.18",
+        "96.0.4664.45",
+        "96.0.4664.55",
+        "96.0.4664.93",
+        "97.0.4692.20",
+	}
+
+	IOSClient = ClientInfo{
 		name:        "IOS",
 		version:     "19.45.4",
 		key:         "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
 		userAgent:   "com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_0 like Mac OS X;)",
 		deviceModel: "iPhone16,2",
+	}
+
+	WebClient = ClientInfo{
+		name:      "WEB",
+		version:   "2.20220801.00.00",
+		key:       "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+		// userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+	}
+
+	AndroidClient = ClientInfo{
+		name:           "ANDROID",
+		version:        "18.11.34",
+		key:            "AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w",
+		userAgent:      "com.google.android.youtube/18.11.34 (Linux; U; Android 11) gzip",
+		androidVersion: 30,
 	}
 )
 
@@ -65,10 +130,10 @@ const (
 	ContentPlaybackNonceAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
 )
 
-func NewClient() *Client {
+func NewClient(client *ClientInfo) *Client {
 	return &Client{
-		client: &IOSClient,
-		Info: "iOSClient",
+		client: client,
+		Info: client.name,
 	}
 }
 
@@ -88,7 +153,7 @@ func (c *Client) GetVideo(id string) (*Video, error) {
 		return &v, nil
 	}
 
-	return &v, nil
+	return &v, err
 }
 
 type innertubeRequest struct {
@@ -280,7 +345,7 @@ func (c *Client) httpPostBodyBytes(ctx context.Context, url string, body interfa
 	return io.ReadAll(resp.Body)
 }
 
-func prepareInnertubeContext(clientInfo clientInfo) inntertubeContext {
+func prepareInnertubeContext(clientInfo ClientInfo) inntertubeContext {
 	return inntertubeContext{
 		Client: innertubeClient{
 			HL:                "en",

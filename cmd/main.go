@@ -13,6 +13,7 @@ import (
 
 const (
 	BIN_BASH = "/usr/bin/bash"
+	COMBINE_CMD = "combine.sh"
 )
 
 const (
@@ -24,17 +25,18 @@ const (
 
 func main() {
 	
-	// [x] todo: combine video and audio
+	// [x] todo: parallel download 
 	// [ ] todo: global log
 	// [ ] todo: show progress while downloading
 
-	if len(os.Args) < 3 {
-		fmt.Println("Usage: go run main.go <youtube_url> <output_file>")
+	if len(os.Args) < 4 {
+		fmt.Println("Usage: go run main.go <client_type=[ios, android, web]> <youtube_url> <output_file>")
 		os.Exit(E_NOT_ALL_ARGS)
 	}
 
-	videoURL := os.Args[1]
-	outputFile := os.Args[2]
+	clientType := os.Args[1]
+	videoURL := os.Args[2]
+	outputFile := os.Args[3]
 
 	log := setupLogger()
 
@@ -44,28 +46,56 @@ func main() {
 		os.Exit(E_EXTRACT_VID)
 	}
 
-	client := youtube.NewClient()
+	var clientInfo *youtube.ClientInfo
+
+	switch clientType {
+	case "ios":
+		clientInfo = &youtube.IOSClient
+	case "android":
+		clientInfo = &youtube.AndroidClient
+	default:
+		clientInfo = &youtube.IOSClient
+		clientInfo.RandomizeUserAgent()
+	}
+
+	client := youtube.NewClient(clientInfo)
+
 	video, err := client.GetVideo(videoID)
-	videoUniqueName := titleMD5(video.Title)
 	if err != nil {
 		log.Error(err.Error())
 		os.Exit(E_VIDEO)
 	}
 
-	log.Info("Comms clear", "title", video.Title, "videoID", videoID)
+	log.Info("Got video info", "title", video.Title, "videoID", videoID, "client", client.Info)
 
-	videoFormat := askForFormat(video.Formats.VideoFormats()) 
-	audioFormat := askForFormat(video.Formats.AudioFormats()) 
+	videoFormat := chooseFormatFrom(video.Formats.VideoFormats()) 
+	audioFormat := chooseFormatFrom(video.Formats.AudioFormats()) 
 
+	videoUniqueName := titleMD5(video.Title)
 	tempVideoFile := fmt.Sprintf("%s_v_%s", videoUniqueName, outputFile)
 	tempAudioFile := fmt.Sprintf("%s_a_%s", videoUniqueName, outputFile)
 
-	err = client.DownloadFormat(video, videoFormat, tempVideoFile, log)
-	err = client.DownloadFormat(video, audioFormat, tempAudioFile, log)
+	ch := make(chan bool)
+
+	downloads := map[string]youtube.Format{
+		tempVideoFile: videoFormat,
+		tempAudioFile: audioFormat,
+	}
+
+	for tempFile, format := range downloads {
+		go func() {
+			err = client.DownloadFormat(video, format, tempFile, log)
+			ch <- true
+		}()
+	}
+
+	for range len(downloads) {
+		<-ch
+	}
 
 	log.Info("Combining video and audio", "video", tempVideoFile, "audio", tempAudioFile)
 
-	cmd := exec.Command(BIN_BASH, "combine.sh", tempVideoFile, tempAudioFile, outputFile)
+	cmd := exec.Command(BIN_BASH, COMBINE_CMD, tempVideoFile, tempAudioFile, outputFile)
 	cmd.Stdout = os.Stdout
 	if err := cmd.Run(); err != nil {
 		log.Error(err.Error())
@@ -80,7 +110,7 @@ func setupLogger() *slog.Logger {
 	return slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 }
 
-func askForFormat(formats []youtube.Format) (youtube.Format) {
+func chooseFormatFrom(formats []youtube.Format) (youtube.Format) {
 	for i, v := range formats {
 		fmt.Printf("%d. %s (%s) %s \n", i+1, v.Quality, v.MimeType, youtube.FormatBytes(v.ContentLength))
 	}

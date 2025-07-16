@@ -10,7 +10,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${fileDirname}",
-            "args": ["https://www.youtube.com/watch?v=1vRto-2MMZo&list=PLN99XDk2SYr7YFHIVmTffejyRZliMGGIM", "15min.mp4"]
+            "args": ["web", "https://www.youtube.com/watch?v=1vRto-2MMZo&list=PLN99XDk2SYr7YFHIVmTffejyRZliMGGIM", "15min.mp4"]
         }
     ]
 }

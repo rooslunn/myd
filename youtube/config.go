@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/dop251/goja"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
-	"github.com/dop251/goja"
 )
 
 const (
@@ -197,9 +197,10 @@ func (config playerConfig) extraFunction(name string) (string, error) {
 			if config[pos-1] == '\\' && config[pos-2] != '\\' {
 				continue
 			}
-			if strChar == 0 {
+			switch strChar {
+			case 0:
 				strChar = b
-			} else if strChar == b {
+			case b:
 				strChar = 0
 			}
 		}
