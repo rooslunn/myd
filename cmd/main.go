@@ -30,7 +30,8 @@ func main() {
 	// [ ] todo: show progress while downloading
 
 	if len(os.Args) < 4 {
-		fmt.Println("Usage: go run main.go <client_type=[ios, android, web]> <youtube_url> <output_file>")
+		fmt.Println("Usage: myd <client_type=[ios, android, web]> <youtube_url> <output_file>")
+		fmt.Println("Example: ./myd ios 'https://www.youtube.com/watch?v=04854XqcfCY' champions.mp4")
 		os.Exit(E_NOT_ALL_ARGS)
 	}
 
@@ -102,6 +103,9 @@ func main() {
 		os.Exit(E_COMBINE)
 	}
 
+	log.Info("Removing temp files", "video", tempVideoFile, "audio", tempAudioFile)
+	removeFiles(tempAudioFile, tempVideoFile)
+
 	log.Info("All operations completed. Godshow.")
 }
 
@@ -127,4 +131,15 @@ func titleMD5(title string) string {
 	h := md5.New()
 	io.WriteString(h, title)
 	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
+func removeFiles(files ...string) error {
+	for _, f := range files {
+		err := os.Remove(f)
+		if err != nil {
+			return fmt.Errorf("error removing file %s: %v", f, err)
+		}
+	}
+
+	return nil
 }
