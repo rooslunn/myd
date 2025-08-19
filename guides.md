@@ -1,7 +1,8 @@
-[ ] remove temp files after combine
+[x] remove temp files after combine
 [x] download audio and video parallel
-[ ] progress of download
-[ ] set default client type (ios, android, web)
+[x] progress of download
+[ ] proxy rotating
+[?] set default client type (ios, android, web)
 
 ### How to min binary
 

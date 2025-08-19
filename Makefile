@@ -21,7 +21,7 @@ build-tinygo:
 
 # Run all builds
 # build: build-normal build-stripped build-upx build-tinygo
-build: build-normal build-stripped
+build: build-stripped
 
 # Compare sizes
 compare:

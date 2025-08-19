@@ -18,6 +18,8 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
+
+	"github.com/schollz/progressbar/v3"
 )
 
 type ClientInfo struct {
@@ -408,10 +410,8 @@ func (c *Client) GetStreamContext(ctx context.Context, video *Video, format *For
 	contentLength := format.ContentLength
 
 	if contentLength == 0 {
-		// some videos don't have length information
 		contentLength = c.downloadOnce(req, w, format)
 	} else {
-		// we have length information, let's download by chunks!
 		c.downloadChunked(ctx, req, w, format)
 	}
 
@@ -496,8 +496,10 @@ func (c *Client) downloadChunked(ctx context.Context, req *http.Request, w *io.P
 	}
 
 	go func() {
-		// copy chunks into the PipeWriter
-		for i := 0; i < len(chunks); i++ {
+
+		bar := progressbar.Default(format.ContentLength, "downloading stream...")
+
+		for i := range chunks {
 			select {
 			case <-cancelCtx.Done():
 				abort(context.Canceled)
@@ -507,10 +509,13 @@ func (c *Client) downloadChunked(ctx context.Context, req *http.Request, w *io.P
 				if err != nil {
 					abort(err)
 				}
+
+				if l := len(data); l > 0 {
+					bar.Add(l)
+				}
 			}
 		}
 
-		// everything succeeded
 		w.Close()
 	}()
 }

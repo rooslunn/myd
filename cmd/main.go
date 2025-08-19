@@ -24,14 +24,10 @@ const (
 )
 
 func main() {
-	
-	// [x] todo: parallel download 
-	// [ ] todo: global log
-	// [ ] todo: show progress while downloading
 
 	if len(os.Args) < 4 {
 		fmt.Println("Usage: myd <client_type=[ios, android, web]> <youtube_url> <output_file>")
-		fmt.Println("Example: ./myd ios 'https://www.youtube.com/watch?v=04854XqcfCY' champions.mp4")
+		fmt.Println("Example: ./myd ios 'https://www.youtube.com/watch?v=1vRto-2MMZo' exercise_everyday.mp4")
 		os.Exit(E_NOT_ALL_ARGS)
 	}
 

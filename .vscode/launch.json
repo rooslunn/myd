@@ -9,8 +9,9 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${fileDirname}",
-            "args": ["web", "https://www.youtube.com/watch?v=1vRto-2MMZo&list=PLN99XDk2SYr7YFHIVmTffejyRZliMGGIM", "15min.mp4"]
+            "program": "${workspaceFolder}/cmd",
+            "args": ["ios", "https://www.youtube.com/watch?v=1vRto-2MMZo", "15min.mp4"],
+            "console": "integratedTerminal"
         }
     ]
 }
